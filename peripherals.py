@@ -3,9 +3,9 @@ import time
 
 #ultrasonic sensor
 class uss:
-    def __init__(self, trigport, echoport) -> None:
-        self.trig = trigport
-        self.echo = echoport
+    def __init__(self, trigpin, echopin) -> None:
+        self.trig = trigpin
+        self.echo = echopin
 
         GPIO.setup(self.trig, GPIO.OUT)
         GPIO.output(self.trig, 0)
@@ -17,32 +17,44 @@ class uss:
         GPIO.output(self.trig, 0)
 
         while GPIO.input(self.echo) == 0:
-            self.start = time.time()
+            self._start = time.time()
         # save time of arrival
         while GPIO.input(self.echo) == 1:
-            self.stop = time.time()
+            self._stop = time.time()
 
-        x = (self.start - self.stop) * 17150
+        x = (self._start - self._stop) * 17150
         print(x)
         return x
 
 class servo:
     def __init__(self, pin) -> None:
-        self.pin = pin
+        self._pin = pin
         GPIO.setup(self.pin, GPIO.OUT)
-        self.servo = GPIO.PWM(11,50)
-        self.servo.start(0)
+        self._servo = GPIO.PWM(self._pin,50)
+        self._servo.start(0)
 
     def moveTo(self, angle):
         # angle in degrees, duty cycle 2-12 (0-180)
-        self.servo.ChangeDutyCycle(2+angle/18)
+        self._servo.ChangeDutyCycle(2+angle/18)
         time.sleep(0.5)
-        self.servo.ChangeDutyCycle(0)
+        self._servo.ChangeDutyCycle(0)
+
+    def stop(self):
+        self._servo.stop()
 
 
 if __name__ == '__main__':
-    test = uss(18,24)
+    GPIO.setmode(GPIO.BCM)
+
+    testuss = uss(18,24)
     for i in range(10):
-        print(test.distance())
+        print(testuss.distance())
         time.sleep(1)
-            
+
+    testservo = servo(17)
+    for i in range(0, 181, 30):
+        testservo.moveTo(i)
+        time.sleep(1)
+    testservo.stop()
+
+    GPIO.cleanup()
