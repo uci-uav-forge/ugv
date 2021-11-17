@@ -23,7 +23,7 @@ class uss:
             self._stop = time.time()
 
         x = (self._start - self._stop) * 17150
-        print(x)
+        print('UGV is {} centimeters from the ground'.format(x))
         return x
 
 class servo:
