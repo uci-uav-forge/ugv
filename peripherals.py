@@ -29,7 +29,7 @@ class uss:
 class servo:
     def __init__(self, pin):
         self._pin = pin
-        GPIO.setup(self.pin, GPIO.OUT)
+        GPIO.setup(self._pin, GPIO.OUT)
         self._servo = GPIO.PWM(self._pin,50)
         self._servo.start(0)
 
