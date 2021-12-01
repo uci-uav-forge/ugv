@@ -3,7 +3,7 @@ import time
 
 #ultrasonic sensor
 class uss:
-    def __init__(self, trigpin, echopin) -> None:
+    def __init__(self, trigpin, echopin):
         self.trig = trigpin
         self.echo = echopin
 

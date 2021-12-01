@@ -22,7 +22,7 @@ def connectMyCopter(connection_string=None, baud=57000):
         parser.add_argument('--connect')
         args = parser.parse_args()
 
-        connection_string = args.connect
+        connection_string = args.connect()
     
 
 	vehicle = connect(connection_string,baud=baud,wait_ready=True)
