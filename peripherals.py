@@ -27,7 +27,7 @@ class uss:
         return x
 
 class servo:
-    def __init__(self, pin) -> None:
+    def __init__(self, pin):
         self._pin = pin
         GPIO.setup(self.pin, GPIO.OUT)
         self._servo = GPIO.PWM(self._pin,50)
