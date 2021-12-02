@@ -45,6 +45,8 @@ class servo:
 
 
 if __name__ == '__main__':
+    GPIO.cleanup()
+
     GPIO.setmode(GPIO.BCM)
 
     testuss = uss(18,24)
