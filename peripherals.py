@@ -45,14 +45,15 @@ class servo:
 
 
 if __name__ == '__main__':
-    GPIO.cleanup()
-
+    
     GPIO.setmode(GPIO.BCM)
 
     testuss = uss(18,24)
+    print('uhh')
     for i in range(10):
         print(testuss.distance())
         time.sleep(1)
+    print('poggers')
 
     testservo = servo(17)
     for i in range(0, 181, 30):
