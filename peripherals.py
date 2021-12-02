@@ -7,6 +7,7 @@ class uss:
         self.trig = trigpin
         self.echo = echopin
 
+        print(self.trig)
         GPIO.setup(self.trig, GPIO.OUT)
         GPIO.output(self.trig, 0)
         GPIO.setup(self.echo, GPIO.IN)
