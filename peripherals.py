@@ -7,7 +7,6 @@ class uss:
         self.trig = trigpin
         self.echo = echopin
 
-        print(self.trig)
         GPIO.setup(self.trig, GPIO.OUT)
         GPIO.output(self.trig, 0)
         GPIO.setup(self.echo, GPIO.IN)
@@ -42,6 +41,36 @@ class servo:
 
     def stop(self):
         self._servo.stop()
+
+class motor:
+    ### use with l298n motor driver
+    def __init__(self, en, in1, in2) -> None:
+        self.en = en
+        self.in1 = in1
+        self.in2 = in2
+
+        GPIO.setup(self.en,GPIO.OUT)
+        GPIO.setup(self.in1,GPIO.OUT)
+        GPIO.setup(self.in2,GPIO.OUT)
+
+        self.p = GPIO.PWM(en,1000)
+        self.p.start(0)
+        GPIO.output(self.in1,GPIO.LOW)
+        GPIO.output(self.in2,GPIO.LOW)
+    
+    def forward(self):
+        GPIO.output(self.in1,GPIO.HIGH)
+        GPIO.output(self.in2,GPIO.LOW)
+    def backward(self):
+        GPIO.output(self.in1,GPIO.LOW)
+        GPIO.output(self.in2,GPIO.HIGH)
+    def stop(self):
+        GPIO.output(self.in1,GPIO.LOW)
+        GPIO.output(self.in2,GPIO.LOW)
+    def speed(self, s):
+        ### enter 25/50/75
+        self.p.ChangeDutyCycle(s)
+
 
 
 if __name__ == '__main__':
