@@ -42,6 +42,8 @@ while True:
 
 # move servo to cut wire
 servo.moveTo(180)
+time.sleep(0.5)
+servo.moveTo(0)
 print('UGV DISCONNECTED FROM UAV')
 
 # tell uav or ground station that we disconnected and they can continue mission
@@ -60,6 +62,6 @@ rmotor.backward()
 time.sleep(3)
 lmotor.forward()
 rmotor.backward()
-
+time.sleep(3)
 
 GPIO.cleanup()
