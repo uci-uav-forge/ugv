@@ -34,9 +34,10 @@ print('UGV NOW DROPPING')
 # loop till uss sense that it is close to ground
 # distance in centimeters, needs to be test with vechile to determine value while on floor
 while True:
-    print(uss.distance(), '\n')
+    x= uss.distance()
+    print('UGV is {} centimeters from the ground\n'.format(x))
     time.sleep(0.5)
-    if uss.distance() < 4:
+    if x < 4:
         break
 
 # move servo to cut wire

@@ -22,8 +22,7 @@ class uss:
         while GPIO.input(self.echo) == 1:
             self._stop = time.time()
 
-        x = (self._start - self._stop) * 17150
-        print('UGV is {} centimeters from the ground'.format(x))
+        x = (self._stop - self._start) * 17150
         return x
 
 class servo:
@@ -32,6 +31,7 @@ class servo:
         GPIO.setup(self._pin, GPIO.OUT)
         self._servo = GPIO.PWM(self._pin,50)
         self._servo.start(0)
+        self.moveTo(0)
 
     def moveTo(self, angle):
         # angle in degrees, duty cycle 2-12 (0-180)
