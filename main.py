@@ -1,8 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 import peripherals
-import ugv_functions as ugv
-from dronekit import connect, VehicleMode,LocationGlobalRelative,APIException
+from src.mavros.mavros.px4.mavros_test_common import MavrosTestCommon
 from pymavlink import mavutil
 
 # pin setup
@@ -16,10 +15,9 @@ uss = peripherals.uss(ussTrigPin, ussEchoPin)
 servo = peripherals.servo(servoPin)
 
 # setup up connection to pixhawk
-vehicle = ugv.connectMyCopter()
-ugv.paramSetup(vehicle)
-ugv.arm(vehicle)
-
+ugv = MavrosTestCommon()
+ugv.set_arm(True, 5)
+ugv.set_mode("OFFBOARD", 5)
 
 # wait till aircraft says it is dropping ugv
 time.sleep(5)
@@ -40,5 +38,7 @@ time.sleep(2.5)
 print('UGV WILL NOW DO MISSION')
 
 
+
+ugv.set_arm(False, 5)
 
 GPIO.cleanup()
