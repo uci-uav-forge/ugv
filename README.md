@@ -7,7 +7,7 @@ Repo for the UGV
 
 http://wiki.ros.org/catkin/Tutorials/create_a_workspace
 
-2. Clone into ```~/catkin_ws/src```
+2. Clone into ```~/catkin_ws/src/ugv/src```
 
 ```
 git clone https://github.com/uci-uav-forge/ugv.git
