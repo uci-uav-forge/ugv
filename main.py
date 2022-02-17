@@ -16,6 +16,7 @@ servo = peripherals.servo(servoPin)
 
 # setup up connection to pixhawk
 ugv = MavrosTestCommon()
+ugv.setUp() # setups mavros services and subscirbers 
 ugv.set_arm(True, 5)
 ugv.set_mode("OFFBOARD", 5)
 
