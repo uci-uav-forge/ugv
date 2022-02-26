@@ -37,7 +37,7 @@ while True:
     x= uss.distance()
     print('UGV is {} centimeters from the ground\n'.format(x))
     time.sleep(0.5)
-    if x < 4:
+    if x < 2:
         break
 
 # move servo to cut wire

@@ -60,9 +60,13 @@ from pymavlink import mavutil
 from six.moves import xrange
 from threading import Thread
 
-from CoveragePathPlanning import Grid
+import RPi.GPIO as GPIO
+import time
+import peripherals
 
-import tkinter as tk
+#from CoveragePathPlanning import Grid
+
+#import tkinter as tk
 
 def get_last_log():
     try:
@@ -78,6 +82,7 @@ def get_last_log():
 
 # Setup the Grid walls for Coverage Planning
 # Code copied and modified from Nitish's Coverage Planning Solution
+"""
 def coverage_setup():
     width = 800
     height = 800
@@ -117,7 +122,8 @@ def coverage_setup():
 
     g.getWidget().pack()
     return g
-
+"""
+"""
 def read_mission(mission_filename):
     wps = []
     with open(mission_filename, 'r') as f:
@@ -130,12 +136,13 @@ def read_mission(mission_filename):
         wps[0].is_current = True
 
     return wps
-
+"""
 def implement_mission(mission_implementation, current_global_position):
     wps = []
 
     # TODO: Modify to allow multiple implementation to be switched easily and preferably on the fly
-    g = coverage_setup()
+    
+    #g = coverage_setup()
 
     endpoint = 100
 
@@ -150,6 +157,7 @@ def implement_mission(mission_implementation, current_global_position):
         else:
             return 16
 
+    """
     for i, coords in enumerate(g.coveragePath()):
         rospy.loginfo(coords)
         # convertedCoords = convert_to_geo(47.39773941040039, 8.5455904006958, coords)
@@ -174,6 +182,9 @@ def implement_mission(mission_implementation, current_global_position):
 
         if i == endpoint:
             break
+    """
+    
+
 
     if wps:
         wps[0].is_current = True
@@ -187,6 +198,7 @@ def convert_to_geo(latt, lon, coord):
 
 # Possibly here, give the coordinates that Nitish's code gives for
 # temporary demo
+"""
 def read_plan_file(f):
     d = json.load(f)
     if 'mission' in d:
@@ -212,7 +224,7 @@ def read_plan_file(f):
                 autocontinue=bool(wp['autoContinue']))
     else:
         raise IOError("no mission items")
-
+"""
 
 class MavrosMissionTest(MavrosTestCommon):
     """
@@ -253,6 +265,15 @@ class MavrosMissionTest(MavrosTestCommon):
         self.hb_thread = Thread(target=self.send_heartbeat, args=())
         self.hb_thread.daemon = True
         self.hb_thread.start()
+
+
+        self.ussTrigPin = 18
+        self.ussEchoPin = 24 
+        self.servoPin = 17
+        self.uss = peripherals.uss(ussTrigPin, ussEchoPin)
+        self.servo = peripherals.servo(servoPin)
+
+
 
     def tearDown(self):
         super(MavrosMissionTest, self).tearDown()
@@ -388,6 +409,7 @@ class MavrosMissionTest(MavrosTestCommon):
     #
     def test_mission(self):
         """Test mission"""
+        """
         if len(sys.argv) >= 2:
             self.mission_name = sys.argv[1]
             mission_file = os.path.dirname(
@@ -407,6 +429,10 @@ class MavrosMissionTest(MavrosTestCommon):
                 wps = implement_mission("Coverage", self.current_global_position)
             except IOError as e:
                 self.fail(e)
+        """
+
+        wps = implement_mission("Coverage", self.current_global_position)
+
 
         # make sure the simulation is ready to start the mission
         self.wait_for_topics(60)
@@ -414,38 +440,65 @@ class MavrosMissionTest(MavrosTestCommon):
                                    10, -1)
         self.wait_for_mav_type(10)
 
+        # loop till uss sense that it is close to ground
+        # distance in centimeters, needs to be test with vechile to determine value while on floor
+        while True:
+            x= uss.distance()
+            print('UGV is {} centimeters from the ground\n'.format(x))
+            time.sleep(0.5)
+            if x < 2:
+                break
+        # might change to subscriber that measure altitude
+
+
+        # move servo to cut wire
+        servo.moveTo(180)
+        time.sleep(0.5)
+        servo.moveTo(0)
+        print('UGV DISCONNECTED FROM UAV')
+
+        # tell uav or ground station that we disconnected and they can continue mission
+        time.sleep(2.5)
+        print('UGV WILL NOW DO MISSION')# tempWpsIndex = 0
+
+
         # push waypoints to FCU and start mission
 
-        # tempWpsIndex = 0
         # while(1):
         #     if(tempWpsIndex + 10 > len(wps)):
         #         break
         #     else:
         #         tempWpsIndex = tempWpsIndex + 10
         #     self.send_wps(wps[tempWpsIndex-10:tempWpsIndex], 30)
-
-        # self.send_wps(wps, 30)
-
+        
+        self.clear_wps(5)
+        
+        self.send_wps(wps, 30)
         self.log_topic_vars()
 
         # This needs to go somewhere else
-        self.clear_wps(5)
+        
 
-        self.send_wps(list(wps[0:1]), 30)
+        #self.send_wps(list(wps[0:1]), 30)
+
 
         self.set_mode("AUTO.MISSION", 5)
         # Arms the Device within 5 seconds, else, timeouts
         self.set_arm(True, 5)
         rospy.loginfo("run mission {0}".format(self.mission_name))
 
-
+        """
         waypointIndex = 1
         waypointMax = 10
         while(waypointIndex < len(wps)):
-            rospy.loginfo("Sending 10 Waypoints")
+            rospy.loginfo("Sending Waypoint")
             self.confirm_waypoints(wps[waypointIndex:(  len(wps) if (waypointIndex+waypointMax > len(wps)) else (waypointIndex + waypointMax))], waypointIndex)
             rospy.loginfo("Waypoints Done")
             waypointIndex = waypointIndex + waypointMax
+        """
+        rospy.loginfo("Sending Waypoint")
+        self.confirm_waypoints(wps, 0)
+        rospy.loginfo("Waypoints Done")
 
         self.set_arm(False, 5)
         self.clear_wps(5)
