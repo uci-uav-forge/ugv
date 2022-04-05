@@ -82,119 +82,28 @@ def get_last_log():
 
 # Setup the Grid walls for Coverage Planning
 # Code copied and modified from Nitish's Coverage Planning Solution
-"""
-def coverage_setup():
-    width = 800
-    height = 800
-    line_width = 1
-    dim = str(width+line_width) + "x" + str(height+line_width)
 
-
-    win = tk.Tk()
-    win.title("Complete Cov")
-    win.geometry(dim)
-    win.configure(bg='black')
-    g = Grid(win, width, height, 100, 100, line_width)
-    g.setStart(0, 0)
-    for i in range(50):
-        g.setWall(10, i)
-
-    for i in range(50):
-        g.setWall(40, i)
-
-    g.setWall(50, 50)
-    g.setWall(50, 51)
-    g.setWall(51, 50)
-    g.setWall(51, 51)
-
-    g.setWall(78, 78)
-    g.setWall(78, 79)
-    g.setWall(79, 78)
-    g.setWall(79, 79)
-
-    for i in range(5):
-        for j in range(5):
-            g.setWall(20+i, 80+j)
-
-    for i in range(5):
-        for j in range(5):
-            g.setWall(20+i, 30+j)
-
-    g.getWidget().pack()
-    return g
-"""
-"""
-def read_mission(mission_filename):
-    wps = []
-    with open(mission_filename, 'r') as f:
-        for waypoint in read_plan_file(f):
-            wps.append(waypoint)
-            rospy.logdebug(waypoint)
-
-    # set first item to current
-    if wps:
-        wps[0].is_current = True
-
-    return wps
-"""
-def implement_mission(mission_implementation, current_global_position):
+def implement_mission():
     wps = []
 
-    # TODO: Modify to allow multiple implementation to be switched easily and preferably on the fly
-    
-    #g = coverage_setup()
+    waypoint = Waypoint(
+        is_current=True,
+        frame=int(3),
+        command=int(16),
+        param1=float(0),
+        param2=float(0),
+        param3=float(0),
+        param4=None,
+        x_lat=float(33.644094736108414),
+        y_long=float(-117.84103471030787),
+        z_alt=float(0),
+        autocontinue=bool(True)
+    )
 
-    endpoint = 100
-
-    # Command 22 = Takeoff
-    # Command 21 = Land
-    # Command 16 = Just go to waypoint?
-    def chooseCommand(iteration):
-        if iteration == 0:
-            return 22
-        elif iteration == endpoint:
-            return 21
-        else:
-            return 16
-
-    """
-    for i, coords in enumerate(g.coveragePath()):
-        rospy.loginfo(coords)
-        # convertedCoords = convert_to_geo(47.39773941040039, 8.5455904006958, coords)
-        convertedCoords = convert_to_geo(current_global_position[0], current_global_position[1], coords)
-        rospy.loginfo(convertedCoords)
-        waypoint = Waypoint(
-            is_current=False,
-            frame=int(3),
-            command=int(chooseCommand(i)),
-            param1=float(0),
-            param2=float(0),
-            param3=float(0),
-            param4=None,
-            x_lat=float(convertedCoords[0]),
-            y_long=float(convertedCoords[1]),
-            z_alt=float(0
-                            if i is endpoint else 10),
-            autocontinue=bool(True)
-        )
-        wps.append(waypoint)
-        rospy.loginfo(waypoint)
-
-        if i == endpoint:
-            break
-    """
-    
-
-
-    if wps:
-        wps[0].is_current = True
+    wps.append(waypoint)
 
     return wps
 
-def convert_to_geo(latt, lon, coord):
-    rospy.loginfo(float(coord[0]*-0.0001335144) + float(latt))
-    rospy.loginfo(float(coord[1]*-0.0001335144) + float(lon))
-    return (float(coord[0]*-0.0001335144) + latt, float(coord[1]*0.00025177001) + lon)
 
 # Possibly here, give the coordinates that Nitish's code gives for
 # temporary demo
@@ -270,8 +179,8 @@ class MavrosMissionTest(MavrosTestCommon):
         self.ussTrigPin = 18
         self.ussEchoPin = 24 
         self.servoPin = 17
-        self.uss = peripherals.uss(ussTrigPin, ussEchoPin)
-        self.servo = peripherals.servo(servoPin)
+        self.uss = peripherals.uss(self.ussTrigPin, self.ussEchoPin)
+        self.servo = peripherals.servo(self.servoPin)
 
 
 
@@ -408,30 +317,8 @@ class MavrosMissionTest(MavrosTestCommon):
     # Test method
     #
     def test_mission(self):
-        """Test mission"""
-        """
-        if len(sys.argv) >= 2:
-            self.mission_name = sys.argv[1]
-            mission_file = os.path.dirname(
-                os.path.realpath(__file__)) + "/missions/" + sys.argv[1]
-            rospy.loginfo("reading mission {0}".format(mission_file))
-            try:
-                # Reading from mission file
-                wps = read_mission(mission_file)
-            except IOError as e:
-                self.fail(e)
-            return
 
-        else:
-            try:
-                # Reading from mission file
-                # wps = read_mission(mission_file)
-                wps = implement_mission("Coverage", self.current_global_position)
-            except IOError as e:
-                self.fail(e)
-        """
-
-        wps = implement_mission("Coverage", self.current_global_position)
+        wps = implement_mission()
 
 
         # make sure the simulation is ready to start the mission
@@ -442,19 +329,21 @@ class MavrosMissionTest(MavrosTestCommon):
 
         # loop till uss sense that it is close to ground
         # distance in centimeters, needs to be test with vechile to determine value while on floor
+        """
         while True:
-            x= uss.distance()
+            x= self.uss.distance()
             print('UGV is {} centimeters from the ground\n'.format(x))
             time.sleep(0.5)
             if x < 2:
                 break
+        """
         # might change to subscriber that measure altitude
 
 
         # move servo to cut wire
-        servo.moveTo(180)
+        self.servo.moveTo(180)
         time.sleep(0.5)
-        servo.moveTo(0)
+        self.servo.moveTo(0)
         print('UGV DISCONNECTED FROM UAV')
 
         # tell uav or ground station that we disconnected and they can continue mission
