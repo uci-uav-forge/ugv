@@ -176,6 +176,7 @@ class MavrosMissionTest(MavrosTestCommon):
         self.hb_thread.start()
 
 
+        GPIO.setmode(GPIO.BCM)
         self.ussTrigPin = 18
         self.ussEchoPin = 24 
         self.servoPin = 17
