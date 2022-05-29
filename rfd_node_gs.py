@@ -1,7 +1,7 @@
 import string
 from tokenize import String
 import rospy
-from std_msgs.msg import Bool, String
+from std_msgs.msg import Int8, String
 from sensor_msgs.msg import NavSatFix
 from mavros_test_common import MavrosTestCommon
 import serial
@@ -16,31 +16,32 @@ def rfd():
     timeout = 5
     ser = serial.Serial(port = port, baudrate = baud, timeout = timeout)
 
+    '''
+    # for if we need to dynamically get waypoint if it isnt given to us before
     wp = (0,0,0)
     def position_callback(data):
         global wp
         wp = (float(data.latitude), float(data.longitude), float(data.altitude))
     rospy.Subscriber('ugv_waypoint', NavSatFix, position_callback)
+    '''
 
     ll = False
     def landing_callback(data):
         global ll
         ll = data.data
-    rospy.Subscriber('ugv_landing', Bool, queue_size=1)
-
-
-    landed_pub = rospy.Publisher('ugv_landed', Bool, queue_size=10)
-    z = Bool()
+    rospy.Subscriber('ugv_landing', Int8, landing_callback)
+    landed_pub = rospy.Publisher('ugv_landing', Int8, queue_size=2)
 
     pos_pub = rospy.Publisher('ugv_position', NavSatFix, queue_size=10)
 
     rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
-        smsg = 'uciforgeugv0//' + str(ll) + '//' + str(wp[0]) + ':' + str(wp[1])
-
+        smsg = 'uciforgeugv0//' + str(ll) # + '//' + str(wp[0]) + ':' + str(wp[1])
+        ser.write(smsg)
         time.sleep(5)
         rmsg = ser.read()
+
         if rmsg.startswith('uciforgeugv1//'):
             rdata = rmsg.split('//')
             if rdata[1] == 'True':
@@ -55,7 +56,7 @@ def rfd():
 
 
         
-        ser.write(smsg)
+        
 
         ser.flushInput()
         ser.flushOutput()

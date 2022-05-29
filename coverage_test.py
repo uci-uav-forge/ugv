@@ -87,8 +87,8 @@ def implement_mission():
         param2=float(0),
         param3=float(0),
         param4=None,
-        x_lat=float(33.644094736108414),
-        y_long=float(-117.84103471030787),
+        x_lat=float(33.644094736108414),   #38.146152 change for comp
+        y_long=float(-117.84103471030787), #-76.426396 change for comp
         z_alt=float(0),
         autocontinue=bool(True)
     )
@@ -175,6 +175,8 @@ class MavrosMissionTest(MavrosTestCommon):
         self.servoPin = 17
         self.uss = peripherals.uss(self.ussTrigPin, self.ussEchoPin)
         self.servo = peripherals.servo(self.servoPin)
+
+        
 
 
 
@@ -331,7 +333,8 @@ class MavrosMissionTest(MavrosTestCommon):
             x= self.uss.distance()
             print('UGV is {} centimeters from the ground\n'.format(x))
             distances.append(x)
-            if len(distances) > 5: distances.pop()
+            print(distances)
+            if len(distances) > 5: distances.pop(0)
             time.sleep(0.5)
             aveOfDistances = sum(distances) / len(distances)
             if len(distances) == 5 and aveOfDistances < 4:
